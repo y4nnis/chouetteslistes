@@ -1,5 +1,3 @@
-# Friendlychat for Flutter
+# ChouettesListes
 
-This is the source code for the end of the Flutter FriendlyChat UI codelab.
-
-It is the starting point of the Flutter FriendlyChat UI codelab.
+This is the source code for the flutter ChouettesListes app
