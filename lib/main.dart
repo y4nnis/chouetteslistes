@@ -76,7 +76,8 @@ class ChatMessage extends StatelessWidget {
       axisAlignment: 0.0,
       child: new Container(
         //margin: const EdgeInsets.symmetric(vertical: 10.0),
-        padding: new EdgeInsets.only(left: 32.0, top: 8.0, bottom: 8.0, right: 16.0),
+        padding: new EdgeInsets.only(
+            left: 32.0, top: 8.0, bottom: 8.0, right: 16.0),
         decoration: new BoxDecoration(
           //set the product backgrounds with alternative colors
           //color: index modulo 2 == 0 ? Colors.grey[300] : Colors.grey[100],
@@ -110,10 +111,18 @@ class ChatScreen extends StatefulWidget {
   State createState() => new ChatScreenState();
 }
 
+
 class ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = <ChatMessage>[];
   final TextEditingController _textController = new TextEditingController();
   bool _isComposing = false;
+  Widget Loader = new Center(
+      child: new Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+          child: new CircularProgressIndicator()
+      )
+  );
+
 
   @override
   Widget build(BuildContext context) {
@@ -176,9 +185,12 @@ class ChatScreenState extends State<ChatScreen> {
           new Flexible(
             child: new FirebaseAnimatedList(
               query: reference,
+              defaultChild: Loader,
               sort: (a, b) => b.key.compareTo(a.key),
               padding: new EdgeInsets.all(0.0),
               reverse: false,
+              duration: const Duration(milliseconds: 600),
+              //increased animation duration
               itemBuilder: (_, DataSnapshot snapshot,
                   Animation<double> animation) {
                 return new ChatMessage(
@@ -226,7 +238,7 @@ class ChatScreenState extends State<ChatScreen> {
                 ),
                 child: new TextField(
                   controller: _textController,
-                  onChanged: (String text)  {
+                  onChanged: (String text) {
                     setState(() {
                       _isComposing = text.length > 0;
                     });
