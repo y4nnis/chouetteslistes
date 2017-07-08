@@ -68,38 +68,67 @@ class ChatMessage extends StatelessWidget {
   final DataSnapshot snapshot;
   final Animation animation;
 
+  Future<Null> _handleSwipe(String key) async {
+    await _ensureLoggedIn();
+    _removeArticle(key: key);
+  }
+
+  void _removeArticle({ String key }) {
+    reference.child(key).remove();
+    analytics.logEvent(name: 'remove_item');
+  }
+
 
   Widget build(BuildContext context) {
-    return new SizeTransition(
-      sizeFactor: new CurvedAnimation(
-          parent: animation, curve: Curves.bounceIn),
-      axisAlignment: 0.0,
-      child: new Container(
-        //margin: const EdgeInsets.symmetric(vertical: 10.0),
-        padding: new EdgeInsets.only(
-            left: 32.0, top: 8.0, bottom: 8.0, right: 16.0),
-        decoration: new BoxDecoration(
-          //set the product backgrounds with alternative colors
-          //color: index modulo 2 == 0 ? Colors.grey[300] : Colors.grey[100],
-          color: Colors.grey[300],
-        ),
-        child: new Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return new Dismissible(
+      key: new ObjectKey(snapshot.hashCode),
+      onDismissed: (DismissDirection){
+        _handleSwipe(snapshot.key);
+      },
 
-          children: <Widget>[
-            new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Container(
-                  margin: const EdgeInsets.only(top: 0.0),
-                  child: new Text(
-                    snapshot.value['text'],
+      background: new Container(
+          color: kDefaultTheme.primaryColor,
+          child: const ListTile(
+              leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
+          )
+      ),
+      secondaryBackground: new Container(
+          color: kDefaultTheme.primaryColor,
+          child: const ListTile(
+              trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
+          )
+      ),
+      child: new SizeTransition(
+        sizeFactor: new CurvedAnimation(
+            parent: animation, curve: Curves.easeIn),
+        axisAlignment: 0.0,
+        child: new Container(
+          //margin: const EdgeInsets.symmetric(vertical: 10.0),
+          padding: new EdgeInsets.only(
+              left: 32.0, top: 8.0, bottom: 8.0, right: 16.0),
+          decoration: new BoxDecoration(
+            //set the product backgrounds with alternative colors
+            //color: index modulo 2 == 0 ? Colors.grey[300] : Colors.grey[100],
+            color: Colors.grey[300],
+          ),
+          child: new Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+
+            children: <Widget>[
+              new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  new Container(
+                    margin: const EdgeInsets.only(top: 0.0),
+                    child: new Text(
+                      snapshot.value['text'],
+                    ),
                   ),
-                ),
-                new Divider(height: 2.0, color: Colors.grey,),
-              ],
-            ),
-          ],
+                  new Divider(height: 2.0, color: Colors.grey,),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -189,8 +218,7 @@ class ChatScreenState extends State<ChatScreen> {
               sort: (a, b) => b.key.compareTo(a.key),
               padding: new EdgeInsets.all(0.0),
               reverse: false,
-              duration: const Duration(milliseconds: 600),
-              //increased animation duration
+              duration: const Duration(milliseconds: 300),
               itemBuilder: (_, DataSnapshot snapshot,
                   Animation<double> animation) {
                 return new ChatMessage(
@@ -277,6 +305,9 @@ class ChatScreenState extends State<ChatScreen> {
     await _ensureLoggedIn();
     _sendMessage(text: text);
   }
+
+
+
 
   void _sendMessage({ String text }) {
     reference.push().set({
